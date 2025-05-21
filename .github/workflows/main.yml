@@ -1,0 +1,56 @@
+ import speech_recognition as sr
+import pyttsx3
+import os
+
+# Initialize Text-to-Speech engine
+engine = pyttsx3.init()
+voices = engine.getProperty('voices')
+# Choose a female voice (usually voices[1], but depends on system)
+engine.setProperty('voice', voices[1].id)
+engine.setProperty('rate', 170)
+
+def speak(text):
+    print("AI:", text)
+    engine.say(text)
+    engine.runAndWait()
+
+# Voice recognition function
+def listen():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
+
+    try:
+        command = recognizer.recognize_google(audio)
+        print("You said:", command)
+        return command.lower()
+    except sr.UnknownValueError:
+        speak("Sorry, I didn't understand that.")
+        return ""
+    except sr.RequestError:
+        speak("Speech service is unavailable.")
+        return ""
+
+# Command handling logic
+def handle_command(command):
+    if "open notepad" in command:
+        os.system("notepad.exe")
+        return "Opening Notepad."
+    elif "what's your name" in command or "who are you" in command:
+        return "I am your local AI assistant."
+    elif "exit" in command or "goodbye" in command:
+        speak("Goodbye!")
+        exit()
+    else:
+        return "Sorry, I can only open notepad or tell you my name for now."
+
+# Main loop
+if __name__ == "__main__":
+    speak("Hello! I'm your assistant. How can I help you?")
+    while True:
+        command = listen()
+        if command:
+            response = handle_command(command)
+            speak(response)
